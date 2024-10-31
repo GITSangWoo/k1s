@@ -10,7 +10,7 @@ def checkCPU(num):
         j = json.loads(r.decode("utf-8"))
         CPUchecklist.append(float(j['CPUPerc'].strip('%')))
     print(CPUchecklist, sum(CPUchecklist))
-    if sum(CPUchecklist) > (num*80):
+    if sum(CPUchecklist) > (num*0.5):
         statusCPU = "warn"
     print(statusCPU)
     return statusCPU
@@ -45,7 +45,7 @@ try:
             stablecnt += 1
             print(stablecnt)
             # stablecnt 가  5이상이면 운용 도커량 감소
-            if stablecnt == 3:
+            if stablecnt == 10:
                 cntdocker -= 1
                 subprocess.run(['docker', 'compose', 'up', '-d', '--scale', f'blog={cntdocker}'])
                 stablecnt = 0

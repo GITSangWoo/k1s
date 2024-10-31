@@ -7,6 +7,14 @@ services:
     deploy: 
       mode: replicated
       replicas: 1 
+      resources:
+        reservations:
+          cpus: '0.015'
+          memory: 6M
+        limits: 
+          cpus: '0.015'
+          memory: 10M
+          
     environment:
      - VIRTUAL_HOST=localhost
      - VIRTUAL_PORT=80
