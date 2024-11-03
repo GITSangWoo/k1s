@@ -75,8 +75,7 @@ file_path = __file__
 timezone = pytz.timezone("Asia/Seoul")
 directory = os.path.dirname(file_path)
 log_path = os.path.join(directory, "dockerlog.log")
-print(directory)
-print(log_path)
+print(f"log 저장되는 곳 : {log_path}")
 
 if not os.path.exists(directory):
     os.makedirs(directory)
