@@ -1,5 +1,5 @@
 [project]
-name = "k1s"
+name = "swautoscale"
 version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
