@@ -19,5 +19,6 @@ license = {text = "MIT"}
 distribution = true
 
 [project.scripts]
+autoscale = 'k1s.autoscale:main'
 i = 'k1s.autoscale:scalein'
 o = 'k1s.autoscale:scaleout'

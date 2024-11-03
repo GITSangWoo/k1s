@@ -75,6 +75,7 @@ file_path = __file__
 timezone = pytz.timezone("Asia/Seoul")
 directory = os.path.dirname(file_path)
 log_path = os.path.join(directory, "dockerlog.log")
+print(f"패키지 설치된 위치: {directory}")
 print(f"log 저장되는 곳 : {log_path}")
 
 if not os.path.exists(directory):
@@ -98,7 +99,7 @@ def main():
             formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
             cntdocker = blogcountj
             result1, result2 = checkCPU(blogcountj)
-            print(f"시간:{formatted_time}, cpu 총 사용량: {result2}")
+            print(f"시간:{formatted_time}, cpu 총 사용량: {result2}, 상태: {result1}")
 
             if (result1 == "warn") and (nomore == 0):
                 warningcnt += 1
