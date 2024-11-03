@@ -13,3 +13,7 @@ license = {text = "MIT"}
 
 [tool.pdm]
 distribution = true
+
+[project.scripts]
+i = 'k1s.autoscale:scalein'
+o = 'k1s.autoscale:scaleout'
