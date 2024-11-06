@@ -9,27 +9,30 @@ import requests
 import sys
 
 # scale in/out 수동 조작을 위한 함수
-def scalein():
-    num = int(sys.argv[1])
+def scalein(num):
+    # num = int(sys.argv[1])
+    log_path = wherelog()
+    print(log_path)
     blogcount = subprocess.check_output(["bash", "-c", "docker stats --no-stream | grep samdul-blog | wc -l"])
     blogcountj = int(blogcount.decode("utf-8").strip())
     local_time = datetime.now(timezone)
     formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
     _, result2 = checkCPU(blogcountj)
-    cntdocker = blogcountj - num
+    cntdocker = blogcountj - int(num)
     subprocess.run(['docker', 'compose', 'up', '-d', '--scale', f'blog={cntdocker}'])
     line_message("scale in")
     with open(log_path, "a", encoding="utf-8", newline='') as f:
         f.write(f"{formatted_time},{result2},I\n")
 
-def scaleout():
-    num = int(sys.argv[1])
+def scaleout(num):
+    # num = int(sys.argv[1])
+    log_path = wherelog()
     blogcount = subprocess.check_output(["bash", "-c", "docker stats --no-stream | grep samdul-blog | wc -l"])
     blogcountj = int(blogcount.decode("utf-8").strip())
     local_time = datetime.now(timezone)
     formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
     _, result2 = checkCPU(blogcountj)
-    cntdocker = blogcountj + num
+    cntdocker = blogcountj + int(num)
     subprocess.run(['docker', 'compose', 'up', '-d', '--scale', f'blog={cntdocker}'])
     line_message("scale out")
     with open(log_path, "a", encoding="utf-8", newline='') as f:
@@ -41,7 +44,7 @@ def readlimit():
     with open('./docker-compose.yml') as f:
         file = yaml.full_load(f)
     cpus_limit = float(file['services']['blog']['deploy']['resources']['limits']['cpus']) * 100
-    print(cpus_limit)
+    #print(cpus_limit)
     return cpus_limit
 
 def checkCPU(num):
@@ -55,8 +58,27 @@ def checkCPU(num):
 
     if sum(CPUchecklist) >= (num * (cpus_limit * 0.5)):
         statusCPU = "warn"
-    print(statusCPU)
+    #print(statusCPU)
     return statusCPU, round(sum(CPUchecklist), 2)
+
+def checkAll():
+    blogcount = subprocess.check_output(["bash", "-c", "docker stats --no-stream | grep samdul-blog | wc -l"])
+    blogcountj = int(blogcount.decode("utf-8").strip())
+    local_time = datetime.now(timezone)
+    formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
+    result1, result2 = checkCPU(blogcountj)
+    return formatted_time, blogcountj, result2
+ 
+
+# 종료 플래그 변수
+def stopApp():
+    global stop_flag
+    stop_flag = True
+
+def startApp():
+    global stop_flag
+    stop_flag = False
+    main()
 
 def line_message(scalekind):
     api_url = "https://notify-api.line.me/api/notify"
@@ -71,28 +93,40 @@ def line_message(scalekind):
         }
         requests.post(api_url, headers=headers, data=message)
 
-file_path = __file__
+stop_flag=False
 timezone = pytz.timezone("Asia/Seoul")
+
+def wherelog():
+    file_path = __file__
+    directory = os.path.dirname(file_path)
+    log_path = os.path.join(directory, "dockerlog.log")
+    # print(f"패키지 설치된 위치: {directory}")
+    # print(f"log 저장되는 곳 : {log_path}")
+    return log_path
+
+file_path = __file__
 directory = os.path.dirname(file_path)
 log_path = os.path.join(directory, "dockerlog.log")
-print(f"패키지 설치된 위치: {directory}")
-print(f"log 저장되는 곳 : {log_path}")
 
 if not os.path.exists(directory):
-    os.makedirs(directory)
+   os.makedirs(directory)
 
 # 로그 파일 있는지 체크 없으면 칼럼 넣은 파일 생성 있으면 데이터 입력
 if not os.path.exists(log_path):
     with open(log_path, "w") as f:
-        f.write("time, CPUuses, scaleIO\n")
+        f.write("time,CPUuses,scaleIO\n")
 
 
 def main():
     try:
+        log_path=wherelog()
         warningcnt = 0
         stablecnt = 0
         nomore = 0
         while True:
+            time.sleep(5)
+            if stop_flag:
+                break; 
             blogcount = subprocess.check_output(["bash", "-c", "docker stats --no-stream | grep samdul-blog | wc -l"])
             blogcountj = int(blogcount.decode("utf-8").strip())
             local_time = datetime.now(timezone)
@@ -130,7 +164,7 @@ def main():
             elif nomore == 1:
                 print("더 이상 컨테이너를 증가 시킬 수 없습니다.")
 
-            elif (result1 == "stable") and (cntdocker > 1):
+            elif (result1 == "stable") and (cntdocker >= 1):
                 stablecnt += 1
                 print(stablecnt)
 
@@ -143,7 +177,8 @@ def main():
                     stablecnt = 0
                     if blogcountj < 30:
                         nomore = 0
-                else:
+                else:   
+                    print(log_path)
                     with open(log_path, "a", encoding="utf-8", newline='') as f:
                         f.write(f"{formatted_time},{result2},\n")
 
