@@ -163,8 +163,12 @@ def main():
 
             elif nomore == 1:
                 print("더 이상 컨테이너를 증가 시킬 수 없습니다.")
-
-            elif (result1 == "stable") and (cntdocker >= 1):
+            
+            elif (result1 == "stable") and (cntdocker == 1):
+                with open(log_path, "a", encoding="utf-8", newline='') as f:
+                    f.write(f"{formatted_time},{result2},\n")
+                
+            elif (result1 == "stable") and (cntdocker > 1):
                 stablecnt += 1
                 print(stablecnt)
 
@@ -177,10 +181,6 @@ def main():
                     stablecnt = 0
                     if blogcountj < 30:
                         nomore = 0
-                else:   
-                    print(log_path)
-                    with open(log_path, "a", encoding="utf-8", newline='') as f:
-                        f.write(f"{formatted_time},{result2},\n")
 
     except KeyboardInterrupt:
         print("Stopped by user.")

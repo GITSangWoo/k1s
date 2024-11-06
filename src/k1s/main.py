@@ -17,7 +17,7 @@ wherelog()
 result0,result1,result2 = checkAll()
 
 with st.form(key='my_form'):
-    st.write("시간:",result0,"총 도커수:",result1, "CPU 총 사용량:",result2)
+    st.write("시간:",result0,"총 컨테이너 수:",result1, "CPU 총 사용량:",result2)
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -38,7 +38,7 @@ with st.form(key='my_form'):
         st.rerun()
 
 with st.form(key="docker"):
-    cnt = st.text_input("스케일 인/아웃할 도커의 개수")
+    cnt = st.text_input("스케일 인/아웃할 컨테이너의 개수")
     
     col1,col2 =st.columns(2)
     with col1:
@@ -48,9 +48,11 @@ with st.form(key="docker"):
     if scale_out:
         scaleout(cnt)
         result0,result1,result2 = checkAll()
-        st.write(cnt,"개","scale out 되었습니다.","총 도커수:",result1,"개 입니다.")
+        st.write(cnt,"개","scale out 되었습니다.","총 컨테이너 수:",result1,"개 입니다.")
     if scale_in:
-        scalein(cnt)
         result0,result1,result2 = checkAll()
-        st.write(cnt,"개","scale out 되었습니다.","총 도커수:",result1,"개 입니다.")
-  
+        if result1 >1:
+            scalein(cnt)
+            st.write(cnt,"개","scale out 되었습니다.","총 컨테이너 수:",result1,"개 입니다.")
+        else : 
+            st.write("현재 운용중인 컨테이너가 1개로 이미 최소입니다.")
